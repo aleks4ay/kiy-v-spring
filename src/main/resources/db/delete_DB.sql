@@ -1,0 +1,8 @@
+DROP TABLE IF EXISTS status;
+DROP TABLE IF EXISTS description;
+DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS worker_roles;
+DROP TABLE IF EXISTS worker;
+DROP TABLE IF EXISTS client;
+DROP SEQUENCE IF EXISTS global_seq_user;
+DROP SEQUENCE IF EXISTS global_seq_order;
