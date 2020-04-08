@@ -1,51 +1,68 @@
 package ua.aleks4ay.kiyv.domain.model;
 
+import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
+@Entity
+@Table(name = "orders", indexes = {@Index( name = "doc_idx", columnList = "id_doc", unique = true)})
 
-//@Entity
 public class Order {
 
-    private String idDoc;
-    private String docNumber = "";
-    private String client = "";
-    private String manager = "";
-    private String designer = "";
+    @Id
+    @GeneratedValue //(strategy = GenerationType.SEQUENCE)
+    @Column(name = "order_id")
+    private int id;
+
+    @Column(name = "id_doc", unique = true)
+    private String kod;
+
+    @Column(name = "doc_number")
+    private String docNumber;
+
+    @Column(name = "manager")
+    private String manager;
+
+    @Column(name = "designer")
+    private String designer;
+
+    @Column(name = "client")
+    private String client;
+
     private int durationTime;
     private LocalDateTime dateCreate;
     private LocalDateTime dateToFactory;
-    private LocalDateTime dateToShipment;
-    private LocalDateTime dateToShipmentFactual;
 
+
+    @OneToMany(mappedBy = "owner", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Description> descriptions;
 
     public Order() {
     }
 
-    public Order(String idDoc, String docNumber, String client, String manager, String designer, int durationTime,
-                 LocalDateTime dateCreate, LocalDateTime dateToFactory, LocalDateTime dateToShipment,
-                 LocalDateTime dateToShipmentFactual) {
-        this.idDoc = idDoc;
+    public Order(String kod, String docNumber, String manager, String designer, String client) {
+        this.kod = kod;
         this.docNumber = docNumber;
-        this.client = client;
         this.manager = manager;
         this.designer = designer;
-        this.durationTime = durationTime;
-        this.dateCreate = dateCreate;
-        this.dateToFactory = dateToFactory;
-        this.dateToShipment = dateToShipment;
-        this.dateToShipmentFactual = dateToShipmentFactual;
-        this.descriptions = new ArrayList<>();
+        this.client = client;
+        this.descriptions = null;
     }
 
-    public String getIdDoc() {
-        return idDoc;
+    public int getId() {
+        return id;
     }
 
-    public void setIdDoc(String idDoc) {
-        this.idDoc = idDoc;
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getKod() {
+        return kod;
+    }
+
+    public void setKod(String kod) {
+        this.kod = kod;
     }
 
     public String getDocNumber() {
@@ -54,14 +71,6 @@ public class Order {
 
     public void setDocNumber(String docNumber) {
         this.docNumber = docNumber;
-    }
-
-    public String getClient() {
-        return client;
-    }
-
-    public void setClient(String client) {
-        this.client = client;
     }
 
     public String getManager() {
@@ -78,6 +87,14 @@ public class Order {
 
     public void setDesigner(String designer) {
         this.designer = designer;
+    }
+
+    public String getClient() {
+        return client;
+    }
+
+    public void setClient(String client) {
+        this.client = client;
     }
 
     public int getDurationTime() {
@@ -104,22 +121,6 @@ public class Order {
         this.dateToFactory = dateToFactory;
     }
 
-    public LocalDateTime getDateToShipment() {
-        return dateToShipment;
-    }
-
-    public void setDateToShipment(LocalDateTime dateToShipment) {
-        this.dateToShipment = dateToShipment;
-    }
-
-    public LocalDateTime getDateToShipmentFactual() {
-        return dateToShipmentFactual;
-    }
-
-    public void setDateToShipmentFactual(LocalDateTime dateToShipmentFactual) {
-        this.dateToShipmentFactual = dateToShipmentFactual;
-    }
-
     public List<Description> getDescriptions() {
         return descriptions;
     }
@@ -127,4 +128,22 @@ public class Order {
     public void setDescriptions(List<Description> descriptions) {
         this.descriptions = descriptions;
     }
+
+    @Override
+    public String toString() {
+        return "Order{" +
+                "id=" + id +
+                ", kod='" + kod + '\'' +
+                ", docNumber='" + docNumber + '\'' +
+                ", manager='" + manager + '\'' +
+                ", designer='" + designer + '\'' +
+                ", client='" + client + '\'' +
+                ", durationTime=" + durationTime +
+                ", dateCreate=" + dateCreate +
+                ", dateToFactory=" + dateToFactory +
+                '}';
+    }
 }
+
+
+

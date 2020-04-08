@@ -1,51 +1,62 @@
 package ua.aleks4ay.kiyv.domain.model;
 
-import ua.aleks4ay.kiyv.domain.name.StatusPosition;
-import ua.aleks4ay.kiyv.domain.name.TypePosition;
+import javax.persistence.*;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
+@Entity
+//@Table("description")
 public class Description {
+    @Id
+    @GeneratedValue
+    private long descrId;
 
-    private int position = 0;
-    private int quantity = 0;
-    private String descrFirst = "";
-    private String descrSecond = "";
-    private String designer = null;
-    private int statusIndex = 0;
-    private int typeIndex = 0;
-    private long statusTime = 0L;
+    private Integer position;
+    private String descrFirst;
+    private String descrSecond;
+    private Integer statusIndex;
+    private Integer typeIndex;
+    private LocalDateTime statusTime;
+    private Integer quantity;
 
-//    private TypePosition type;
-//    private StatusPosition status;
+    @Column(nullable = false, updatable = false, scale = 2, precision = 10) // {1234567890.12}
+    private BigDecimal amount;
+
+
+    @ManyToOne(optional = false, cascade = CascadeType.ALL)
+    @JoinColumn(name = "ORDER_ID") //add column 'Descr.ORDER_ID' with link to table 'Order'
+    private Order owner;
 
     public Description() {
     }
 
-    public Description(int position, int quantity, String descrFirst, String descrSecond, String designer,
-                       int statusIndex, int typeIndex, long statusTime) {
+    public Description(Integer position, String descrFirst, String descrSecond, Integer statusIndex, Integer typeIndex,
+                       LocalDateTime statusTime, Integer quantity, BigDecimal amount, Order owner) {
         this.position = position;
-        this.quantity = quantity;
         this.descrFirst = descrFirst;
         this.descrSecond = descrSecond;
-        this.designer = designer;
         this.statusIndex = statusIndex;
         this.typeIndex = typeIndex;
         this.statusTime = statusTime;
+        this.quantity = quantity;
+        this.amount = amount;
+        this.owner = owner;
     }
 
-    public int getPosition() {
+    public long getDescrId() {
+        return descrId;
+    }
+
+    public void setDescrId(long descrId) {
+        this.descrId = descrId;
+    }
+
+    public Integer getPosition() {
         return position;
     }
 
-    public void setPosition(int position) {
+    public void setPosition(Integer position) {
         this.position = position;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
     }
 
     public String getDescrFirst() {
@@ -64,35 +75,66 @@ public class Description {
         this.descrSecond = descrSecond;
     }
 
-    public String getDesigner() {
-        return designer;
-    }
-
-    public void setDesigner(String designer) {
-        this.designer = designer;
-    }
-
-    public int getStatusIndex() {
+    public Integer getStatusIndex() {
         return statusIndex;
     }
 
-    public void setStatusIndex(int statusIndex) {
+    public void setStatusIndex(Integer statusIndex) {
         this.statusIndex = statusIndex;
     }
 
-    public int getTypeIndex() {
+    public Integer getTypeIndex() {
         return typeIndex;
     }
 
-    public void setTypeIndex(int typeIndex) {
+    public void setTypeIndex(Integer typeIndex) {
         this.typeIndex = typeIndex;
     }
 
-    public long getStatusTime() {
+    public LocalDateTime getStatusTime() {
         return statusTime;
     }
 
-    public void setStatusTime(long statusTime) {
+    public void setStatusTime(LocalDateTime statusTime) {
         this.statusTime = statusTime;
+    }
+
+    public Integer getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
+
+    public Order getOwner() {
+        return owner;
+    }
+
+    public void setOwner(Order owner) {
+        this.owner = owner;
+    }
+
+    @Override
+    public String toString() {
+        return "Description{" +
+                "descrId=" + descrId +
+                ", position=" + position +
+                ", descrFirst='" + descrFirst + '\'' +
+                ", descrSecond='" + descrSecond + '\'' +
+                ", statusIndex=" + statusIndex +
+                ", typeIndex=" + typeIndex +
+                ", statusTime=" + statusTime +
+                ", quantity=" + quantity +
+                ", amount=" + amount +
+                '}';
     }
 }

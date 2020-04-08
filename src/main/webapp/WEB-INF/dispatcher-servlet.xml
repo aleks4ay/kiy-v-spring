@@ -13,8 +13,7 @@
     <mvc:annotation-driven/>
     <context:component-scan base-package="ua.aleks4ay"/>
 
-    <import resource="classpath:/spring/dataSource.xml"/>
-    <import resource="classpath:/spring/create-db.xml"/>
+    <import resource="classpath:persistence-config.xml"/>
 
     <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
         <property name="prefix" value="/WEB-INF/jsp/"/>
