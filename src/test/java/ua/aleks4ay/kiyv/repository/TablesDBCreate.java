@@ -2,6 +2,7 @@ package ua.aleks4ay.kiyv.repository;
 
 import org.junit.Before;
 import org.junit.Test;
+import ua.aleks4ay.kiyv.domain.model.Client;
 import ua.aleks4ay.kiyv.domain.model.Description;
 import ua.aleks4ay.kiyv.domain.model.Order;
 
@@ -12,13 +13,22 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
-public class OrderCreateDB {
+public class TablesDBCreate {
     private EntityManagerFactory entityManagerFactory;
 
     @Before
     public void setUp() throws Exception{
-        int i = 1;
-        Order order = new Order(("DR3" + i++), "KI-0001234", "Соломко", "Мосиенко", "Агромат-сервис");
+        entityManagerFactory = Persistence.createEntityManagerFactory("ua.aleks4ay.kiyv.domain.model");
+        EntityManager em = entityManagerFactory.createEntityManager();
+        em.getTransaction().begin();
+        em.persist(createTempOrder());
+        em.persist(createTempClient());
+        em.getTransaction().commit();
+        em.close();
+    }
+
+    public Order createTempOrder() {
+        Order order = new Order("DR31", "KI-0001234", "Соломко", "Мосиенко", "Агромат-сервис");
         Description d1 = new Description(1 , "Стол н/ж 1200х600х850, с бортом, 3 полки", "", 0, 0,
                 LocalDateTime.now(), 1, new BigDecimal(2825.00), null);
         Description d2 = new Description(2 , "Стеллаж н/ж 1200х400х1250, 5 полок", "", 0, 0,
@@ -32,13 +42,14 @@ public class OrderCreateDB {
         d3.setOwner(order);
         d4.setOwner(order);
         order.setDescriptions(Arrays.asList(d1, d2, d3, d4));
+        return order;
+    }
 
-        entityManagerFactory = Persistence.createEntityManagerFactory("ua.aleks4ay.kiyv.domain.model");
-        EntityManager em = entityManagerFactory.createEntityManager();
-        em.getTransaction().begin();
-        em.persist(order);
-        em.getTransaction().commit();
-        em.close();
+    public Client createTempClient() {
+        Client client = new Client();
+        client.setKod("klient1");
+        client.setClientName("klient name 1");
+        return client;
     }
 
     @Test
@@ -51,6 +62,10 @@ public class OrderCreateDB {
                 .forEach(System.out::println);
         System.out.println("-------------------");
         em.createQuery("from Description ", Description.class)
+                .getResultList()
+                .forEach(System.out::println);
+        System.out.println("-------------------");
+        em.createQuery("from Client ", Client.class)
                 .getResultList()
                 .forEach(System.out::println);
 

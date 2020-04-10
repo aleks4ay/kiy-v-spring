@@ -46,7 +46,6 @@ public class OrderServiceImpl implements OrderService{
     @Override
     public Order getOne(int id) {
         Order order = orderRepository.findById(id).orElse(null);
-//        System.out.println(order);
         return order;
     }
 

@@ -2,6 +2,7 @@ package ua.aleks4ay.kiyv.domain.services;
 
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import ua.aleks4ay.kiyv.domain.model.Client;
 import ua.aleks4ay.kiyv.domain.model.Order;
 
 import java.util.Arrays;
@@ -15,6 +16,9 @@ public class Main {
 
             OrderService orderService = appCtx.getBean(OrderService.class);
             orderService.save(new Order("kod1", "docNumber1", "manager1", "designer1", "client1"));
+
+            ClientService clientService = appCtx.getBean(ClientService.class);
+            clientService.save(new Client("    Y9", "ПерміКо"));
         }
     }
 }
