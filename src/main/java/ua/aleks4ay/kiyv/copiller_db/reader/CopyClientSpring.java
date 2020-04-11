@@ -37,7 +37,7 @@ public class CopyClientSpring {
 
         Map<String, Client> oldClient = clientService.getAll()
                 .stream()
-                .collect(Collectors.toMap(Client::getKod, Client::getClient));
+                .collect(Collectors.toMap(Client::getId, Client::getClient));
 
         try (Statement st = connDbf.createStatement()){
             ResultSet rs1 = st.executeQuery("select ID, DESCR from SC172;");
@@ -49,7 +49,7 @@ public class CopyClientSpring {
                     name = "-";
                 }
                 Client client = new Client(rs1.getString(1), name);
-                if ( oldClient.containsKey(client.getKod()) && oldClient.get(client.getKod()).getClientName().equals(name) ) {
+                if ( oldClient.containsKey(client.getId()) && oldClient.get(client.getId()).getClientName().equals(name) ) {
                     continue;
                 }
                 else {

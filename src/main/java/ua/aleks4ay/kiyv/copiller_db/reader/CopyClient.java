@@ -53,19 +53,19 @@ public class CopyClient {
         List<Client> listUpdatingClient = new ArrayList<>();
         Map<String, String> oldClient = clientDao.getAll()
                 .stream()
-                .collect(Collectors.toMap(Client::getKod, Client::getClientName));
+                .collect(Collectors.toMap(Client::getId, Client::getClientName));
 
         List<Client> listClientFrom1C = clientDbfReader.getAll();
 
         for (Client client : listClientFrom1C) {
-            if (!oldClient.containsKey(client.getKod())) {
+            if (!oldClient.containsKey(client.getId())) {
                 listNewClient.add(client);
-            } else if (!oldClient.get(client.getKod()).equals(client.getClientName())) {
+            } else if (!oldClient.get(client.getId()).equals(client.getClientName())) {
                 listUpdatingClient.add(client);
-                oldClient.remove(client.getKod());
+                oldClient.remove(client.getId());
             }
             else {
-                oldClient.remove(client.getKod());
+                oldClient.remove(client.getId());
             }
         }
 

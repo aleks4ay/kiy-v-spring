@@ -29,7 +29,7 @@ public class ClientServiceImpl implements ClientService {
     @Override
     @Transactional
     public Client save(Client newClient) {
-        Client clientFromDb = clientRepository.findByKod(newClient.getKod());
+        Client clientFromDb = clientRepository.findByKod(newClient.getId());
         if (clientFromDb == null) {
             return clientRepository.save(newClient);
         }
