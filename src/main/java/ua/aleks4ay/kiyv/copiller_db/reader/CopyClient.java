@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 public class CopyClient {
 
     private static final CopyClient copyClient = new CopyClient();
+    private static final ClientDao clientDao = new ClientDaoJdbc();
+    private static final ClientDbf clientDbfReader = new ClientDbfReader();
 
     private CopyClient() {
     }
@@ -31,9 +33,9 @@ public class CopyClient {
         System.out.println("time = " + (double)(end-start) + " mc." );
     }
 
-    public synchronized void doCopyNewRecord() {
-        ClientDao clientDao = new ClientDaoJdbc();
-        ClientDbf clientDbfReader = new ClientDbfReader();
+    public void doCopyNewRecord() {
+//        ClientDao clientDao = new ClientDaoJdbc();
+//        ClientDbf clientDbfReader = new ClientDbfReader();
 
         while ( clientDao.isBlocking()) {
             try {
@@ -47,32 +49,38 @@ public class CopyClient {
         System.out.println("start write  'C L I E N T S'");
 
         List<Client> listNewClient = new ArrayList<>();
+        List<Client> listDeletingClient = new ArrayList<>();
         List<Client> listUpdatingClient = new ArrayList<>();
         Map<String, String> oldClient = clientDao.getAll()
                 .stream()
                 .collect(Collectors.toMap(Client::getKod, Client::getClientName));
 
-        List<Client> tempListClient = clientDbfReader.getAll();
+        List<Client> listClientFrom1C = clientDbfReader.getAll();
 
-        for (Client client : tempListClient) {
+        for (Client client : listClientFrom1C) {
             if (!oldClient.containsKey(client.getKod())) {
                 listNewClient.add(client);
             } else if (!oldClient.get(client.getKod()).equals(client.getClientName())) {
                 listUpdatingClient.add(client);
+                oldClient.remove(client.getKod());
+            }
+            else {
+                oldClient.remove(client.getKod());
             }
         }
 
-        System.out.println("Add " + listNewClient.size() + " new Clients.");
-        System.out.println("Update " + listUpdatingClient.size() + " old Clients.");
-
         clientDao.saveAll(listNewClient);
         clientDao.updateAll(listUpdatingClient);
+        clientDao.deleteAll(oldClient.keySet());
+
+        System.out.println("Added " + listNewClient.size() +
+                ", Removed " + oldClient.size() +
+                ", Updated " + listUpdatingClient.size() + " clients.");
         System.out.println("End write to DB\n");
         try {
             clientDao.setUnblock();
 
-            Thread.sleep(2000);
-            System.out.println("End sleep 2000");
+            Thread.sleep(500);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

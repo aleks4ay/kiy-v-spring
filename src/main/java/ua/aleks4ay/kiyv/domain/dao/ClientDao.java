@@ -2,6 +2,7 @@ package ua.aleks4ay.kiyv.domain.dao;
 
 import ua.aleks4ay.kiyv.domain.model.Client;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface ClientDao {
@@ -17,6 +18,8 @@ public interface ClientDao {
     boolean saveAll(List<Client> clientList);
 
     boolean updateAll(List<Client> clientList);
+
+    boolean deleteAll(Collection<String> clientList);
 
     boolean isBlocking();
     void setBlock();

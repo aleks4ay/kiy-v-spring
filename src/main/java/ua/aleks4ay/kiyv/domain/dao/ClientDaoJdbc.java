@@ -4,6 +4,7 @@ import ua.aleks4ay.kiyv.domain.model.Client;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class ClientDaoJdbc implements ClientDao {
@@ -83,13 +84,13 @@ public class ClientDaoJdbc implements ClientDao {
                 ps.executeBatch();
             }
             connPostgres.commit();
+            connPostgres.setAutoCommit(true);
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return false;
     }
-
 
 
     @Override
@@ -105,7 +106,28 @@ public class ClientDaoJdbc implements ClientDao {
                 ps.executeBatch();
             }
             connPostgres.commit();
+            connPostgres.setAutoCommit(true);
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
+    @Override
+    public boolean deleteAll(Collection<String> clientListKod) {
+        try {
+            connPostgres.setAutoCommit(false);
+
+            for (String kod : clientListKod) {
+                PreparedStatement ps = connPostgres.prepareStatement("DELETE FROM client WHERE kod = ?;");
+                ps.setString(1, kod);
+                ps.addBatch();
+                ps.executeBatch();
+            }
+            connPostgres.commit();
+            connPostgres.setAutoCommit(true);
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -116,9 +138,9 @@ public class ClientDaoJdbc implements ClientDao {
     @Override
     public boolean isBlocking() {
         try (Statement statement = connPostgres.createStatement()){
-            ResultSet rs = statement.executeQuery("SELECT blocking FROM table_flag WHERE nane = 'client';");
+            ResultSet rs = statement.executeQuery("SELECT status FROM table_flag WHERE parametr_nane = 'blocking';");
             while (rs.next()) {
-                return rs.getBoolean("blocking");
+                return rs.getBoolean("status");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -129,8 +151,7 @@ public class ClientDaoJdbc implements ClientDao {
     @Override
     public void setBlock() {
         try (Statement statement = connPostgres.createStatement()){
-            statement.executeUpdate("UPDATE table_flag SET blocking = TRUE WHERE nane = 'client';");
-            connPostgres.commit();
+            statement.executeUpdate("UPDATE table_flag SET status = TRUE WHERE parametr_nane = 'blocking';");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -139,8 +160,7 @@ public class ClientDaoJdbc implements ClientDao {
     @Override
     public void setUnblock() {
         try (Statement statement = connPostgres.createStatement()){
-            statement.executeUpdate("UPDATE table_flag SET blocking = FALSE WHERE nane = 'client';");
-            connPostgres.commit();
+            statement.executeUpdate("UPDATE table_flag SET status = FALSE WHERE parametr_nane = 'blocking';");
         } catch (SQLException e) {
             e.printStackTrace();
         }
