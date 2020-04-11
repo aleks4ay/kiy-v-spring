@@ -47,7 +47,7 @@ public class TablesDBCreate {
 
     public Client createTempClient() {
         Client client = new Client();
-        client.setKod("klient1");
+        client.setId("klient1");
         client.setClientName("klient name 1");
         return client;
     }

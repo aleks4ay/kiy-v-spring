@@ -5,13 +5,10 @@ import javax.persistence.*;
 @Entity
 @Table(name = "client")
 public class Client {
-    @Id
-    @GeneratedValue //(strategy = GenerationType.SEQUENCE)
-    @Column(name = "id")
-    private int id;
 
-    @Column(name = "kod", unique = true)
-    private String kod;
+    @Id
+    @Column(name = "id", unique = true)
+    private String id;
 
     @Column(name = "clientName")
     private String clientName;
@@ -19,25 +16,17 @@ public class Client {
     public Client() {
     }
 
-    public Client(String kod, String clientName) {
-        this.kod = kod;
+    public Client(String id, String clientName) {
+        this.id = id;
         this.clientName = clientName;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
-    }
-
-    public String getKod() {
-        return kod;
-    }
-
-    public void setKod(String kod) {
-        this.kod = kod;
     }
 
     public String getClientName() {
@@ -51,8 +40,7 @@ public class Client {
     @Override
     public String toString() {
         return "Client{" +
-                "id=" + id +
-                ", kod='" + kod + '\'' +
+                ", id='" + id + '\'' +
                 ", clientName='" + clientName + '\'' +
                 '}';
     }
@@ -61,7 +49,7 @@ public class Client {
     public boolean equals(Object obj) {
         if (obj.getClass().equals(Client.class)) {
             Client client = (Client) obj;
-            return this.kod.equals(client.getKod()) && this.clientName.equals(client.getClientName());
+            return this.id.equals(client.getId()) && this.clientName.equals(client.getClientName());
         }
         return false;
     }

@@ -12,14 +12,14 @@ public class ClientDaoJdbc implements ClientDao {
     private static Connection connPostgres = UtilDao.getConnPostgres();
 
     @Override
-    public Client getByKod(String kod) {
+    public Client getByKod(String id) {
         try {
-            PreparedStatement statement = connPostgres.prepareStatement("SELECT clientname FROM client WHERE kod = ?;");
-            statement.setString(1, kod);
+            PreparedStatement statement = connPostgres.prepareStatement("SELECT clientname FROM client WHERE id = ?;");
+            statement.setString(1, id);
             ResultSet rs = statement.executeQuery();
 
             while (rs.next()) {
-                return new Client(rs.getString("kod"), rs.getString("clientname"));
+                return new Client(rs.getString("id"), rs.getString("clientname"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -32,9 +32,9 @@ public class ClientDaoJdbc implements ClientDao {
         List<Client> result = new ArrayList<>();
         try {
             Statement statement = connPostgres.createStatement();
-            ResultSet rs = statement.executeQuery("SELECT kod, clientname FROM client;");
+            ResultSet rs = statement.executeQuery("SELECT id, clientname FROM client;");
             while (rs.next()) {
-                result.add(new Client( rs.getString("kod"), rs.getString("clientname")));
+                result.add(new Client( rs.getString("id"), rs.getString("clientname")));
             }
             return result;
         } catch (SQLException e) {
@@ -45,10 +45,10 @@ public class ClientDaoJdbc implements ClientDao {
 
     @Override
     public boolean save(Client newClient) {
-        try (PreparedStatement statement = connPostgres.prepareStatement("INSERT INTO client (id, kod, clientname) " +
-                "VALUES (nextval('hibernate_sequence'), ?, ?);")){
+        try (PreparedStatement statement = connPostgres.prepareStatement("INSERT INTO client (id, clientname) " +
+                "VALUES (?, ?);")){
 
-            statement.setString(1, newClient.getKod());
+            statement.setString(1, newClient.getId());
             statement.setString(2, newClient.getClientName());
             return statement.execute();
 
@@ -59,9 +59,9 @@ public class ClientDaoJdbc implements ClientDao {
     }
 
     @Override
-    public boolean delete(String kod) {
-        try (PreparedStatement statement = connPostgres.prepareStatement("DELETE FROM client WHERE kod = ?;")){
-            statement.setString(1, kod);
+    public boolean delete(String id) {
+        try (PreparedStatement statement = connPostgres.prepareStatement("DELETE FROM client WHERE id = ?;")){
+            statement.setString(1, id);
             return statement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -76,9 +76,9 @@ public class ClientDaoJdbc implements ClientDao {
             connPostgres.setAutoCommit(false);
 
             for (Client client : clientList) {
-                PreparedStatement ps = connPostgres.prepareStatement("INSERT INTO client (id, kod, clientname) " +
-                        "VALUES (nextval('hibernate_sequence'), ?, ?);");
-                ps.setString(1, client.getKod());
+                PreparedStatement ps = connPostgres.prepareStatement("INSERT INTO client (id, clientname) " +
+                        "VALUES (?, ?);");
+                ps.setString(1, client.getId());
                 ps.setString(2, client.getClientName());
                 ps.addBatch();
                 ps.executeBatch();
@@ -99,9 +99,9 @@ public class ClientDaoJdbc implements ClientDao {
             connPostgres.setAutoCommit(false);
 
             for (Client client : clientList) {
-                PreparedStatement ps = connPostgres.prepareStatement("UPDATE client SET clientname = ? WHERE kod = ?;");
+                PreparedStatement ps = connPostgres.prepareStatement("UPDATE client SET clientname = ? WHERE id = ?;");
                 ps.setString(1, client.getClientName());
-                ps.setString(2, client.getKod());
+                ps.setString(2, client.getId());
                 ps.addBatch();
                 ps.executeBatch();
             }
@@ -115,13 +115,13 @@ public class ClientDaoJdbc implements ClientDao {
     }
 
     @Override
-    public boolean deleteAll(Collection<String> clientListKod) {
+    public boolean deleteAll(Collection<String> clientListId) {
         try {
             connPostgres.setAutoCommit(false);
 
-            for (String kod : clientListKod) {
-                PreparedStatement ps = connPostgres.prepareStatement("DELETE FROM client WHERE kod = ?;");
-                ps.setString(1, kod);
+            for (String id : clientListId) {
+                PreparedStatement ps = connPostgres.prepareStatement("DELETE FROM client WHERE id = ?;");
+                ps.setString(1, id);
                 ps.addBatch();
                 ps.executeBatch();
             }
