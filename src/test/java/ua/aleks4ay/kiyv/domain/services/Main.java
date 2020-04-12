@@ -16,9 +16,6 @@ public class Main {
 
             OrderService orderService = appCtx.getBean(OrderService.class);
             orderService.save(new Order("kod1", "docNumber1", "manager1", "designer1", "client1"));
-
-            ClientService clientService = appCtx.getBean(ClientService.class);
-            clientService.save(new Client("    Y9", "ПерміКо"));
         }
     }
 }
