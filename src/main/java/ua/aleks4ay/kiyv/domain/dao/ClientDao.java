@@ -11,7 +11,7 @@ public interface ClientDao {
 
     boolean delete(String kod);
 
-    Client getByKod(String kod);
+    Client getById(String kod);
 
     List<Client> getAll();
 
@@ -22,7 +22,7 @@ public interface ClientDao {
     boolean deleteAll(Collection<String> clientList);
 
     boolean isBlocking();
-    void setBlock();
-    void setUnblock();
+    void setLock();
+    void setUnlock();
 
 }
