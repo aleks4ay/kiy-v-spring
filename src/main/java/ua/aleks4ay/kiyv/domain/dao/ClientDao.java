@@ -22,7 +22,7 @@ public interface ClientDao {
     boolean deleteAll(Collection<String> clientList);
 
     boolean isBlocking();
-    void setLock();
-    void setUnlock();
+    boolean setLock();
+    boolean setUnlock();
 
 }
