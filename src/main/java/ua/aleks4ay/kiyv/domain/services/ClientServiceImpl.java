@@ -16,8 +16,8 @@ public class ClientServiceImpl implements ClientService {
     private ClientRepository clientRepository;
 
     @Override
-    public Client getOne(int id) {
-        Client client = clientRepository.findById(id).orElse(null);
+    public Client getOne(String id) {
+        Client client = clientRepository.findById(id);
         return client;
     }
 
@@ -29,7 +29,7 @@ public class ClientServiceImpl implements ClientService {
     @Override
     @Transactional
     public Client save(Client newClient) {
-        Client clientFromDb = clientRepository.findByKod(newClient.getId());
+        Client clientFromDb = clientRepository.findById(newClient.getId());
         if (clientFromDb == null) {
             return clientRepository.save(newClient);
         }
@@ -43,7 +43,7 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     @Transactional
-    public boolean delete(int id) {
+    public boolean delete(String id) {
         if (clientRepository.findById(id) != null) {
             clientRepository.deleteById(id);
             if (getOne(id) == null) {
@@ -56,6 +56,7 @@ public class ClientServiceImpl implements ClientService {
     @Override
     @Transactional
     public boolean saveAll(List<Client> clientList) {
+//        clientRepository.saveAll(clientList);
         for (Client client : clientList) {
             save(client);
         }

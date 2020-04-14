@@ -8,11 +8,11 @@ public interface ClientService {
 
     Client save(Client client);
 
-    boolean delete(int id);
+    boolean delete(String id);
 
 //    Client update(Client order);
 
-    Client getOne(int id);
+    Client getOne(String id);
 
     List<Client> getAll();
 
