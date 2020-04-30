@@ -1,37 +1,44 @@
 package ua.aleks4ay.kiyv.domain.model;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Entity
-@Table(name = "orders", indexes = {@Index( name = "doc_idx", columnList = "id_doc", unique = true)})
+@Table(name = "orders", indexes = {@Index( name = "order_idx", columnList = "id", unique = true)})
 
 public class Order {
 
     @Id
-    @GeneratedValue //(strategy = GenerationType.SEQUENCE)
-    @Column(name = "order_id")
-    private int id;
+    @Column(name = "id", unique = true)
+    private String id;
 
-    @Column(name = "id_doc", unique = true)
-    private String kod;
-
-    @Column(name = "doc_number")
+    @Column(name = "docno")
     private String docNumber;
 
-    @Column(name = "manager")
-    private String manager;
+    @Column(name = "manager_id")
+    private String idManager;
 
-    @Column(name = "designer")
-    private String designer;
+    @Column(name = "designer_id")
+    private String idDesigner;
 
-    @Column(name = "client")
-    private String client;
+    @Column(name = "client_id")
+    private String idClient;
 
+    @Column(name = "price")
+    double price;
+
+    @Column
     private int durationTime;
-    private LocalDateTime dateCreate;
-    private LocalDateTime dateToFactory;
+    @Column
+    private LocalDate dateCreate;
+    @Column
+    private LocalTime timeCreate;
+    @Column
+    private LocalDate dateToFactory;
+    @Column
+    private LocalDate dateEnd;
 
 
     @OneToMany(mappedBy = "owner", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
@@ -40,29 +47,36 @@ public class Order {
     public Order() {
     }
 
-    public Order(String kod, String docNumber, String manager, String designer, String client) {
-        this.kod = kod;
+    public Order(String id, String docNumber, String idManager, String idDesigner, String idClient) {
+        this.id = id;
         this.docNumber = docNumber;
-        this.manager = manager;
-        this.designer = designer;
-        this.client = client;
+        this.idManager = idManager;
+        this.idDesigner = idDesigner;
+        this.idClient = idClient;
         this.descriptions = null;
     }
 
-    public int getId() {
+    public Order(String id, String docNumber, String idManager, String idDesigner, String idClient, double price,
+                 int durationTime, LocalDate dateCreate, LocalTime timeCreate, LocalDate dateToFactory, LocalDate dateEnd) {
+        this.id = id;
+        this.docNumber = docNumber;
+        this.idManager = idManager;
+        this.idDesigner = idDesigner;
+        this.idClient = idClient;
+        this.price = price;
+        this.durationTime = durationTime;
+        this.dateCreate = dateCreate;
+        this.timeCreate = timeCreate;
+        this.dateToFactory = dateToFactory;
+        this.dateEnd = dateEnd;
+    }
+
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
-    }
-
-    public String getKod() {
-        return kod;
-    }
-
-    public void setKod(String kod) {
-        this.kod = kod;
     }
 
     public String getDocNumber() {
@@ -73,28 +87,36 @@ public class Order {
         this.docNumber = docNumber;
     }
 
-    public String getManager() {
-        return manager;
+    public String getIdManager() {
+        return idManager;
     }
 
-    public void setManager(String manager) {
-        this.manager = manager;
+    public void setIdManager(String idManager) {
+        this.idManager = idManager;
     }
 
-    public String getDesigner() {
-        return designer;
+    public String getIdDesigner() {
+        return idDesigner;
     }
 
-    public void setDesigner(String designer) {
-        this.designer = designer;
+    public void setIdDesigner(String idDesigner) {
+        this.idDesigner = idDesigner;
     }
 
-    public String getClient() {
-        return client;
+    public String getIdClient() {
+        return idClient;
     }
 
-    public void setClient(String client) {
-        this.client = client;
+    public void setIdClient(String idClient) {
+        this.idClient = idClient;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
     }
 
     public int getDurationTime() {
@@ -105,20 +127,36 @@ public class Order {
         this.durationTime = durationTime;
     }
 
-    public LocalDateTime getDateCreate() {
+    public LocalDate getDateCreate() {
         return dateCreate;
     }
 
-    public void setDateCreate(LocalDateTime dateCreate) {
+    public void setDateCreate(LocalDate dateCreate) {
         this.dateCreate = dateCreate;
     }
 
-    public LocalDateTime getDateToFactory() {
+    public LocalTime getTimeCreate() {
+        return timeCreate;
+    }
+
+    public void setTimeCreate(LocalTime timeCreate) {
+        this.timeCreate = timeCreate;
+    }
+
+    public LocalDate getDateToFactory() {
         return dateToFactory;
     }
 
-    public void setDateToFactory(LocalDateTime dateToFactory) {
+    public void setDateToFactory(LocalDate dateToFactory) {
         this.dateToFactory = dateToFactory;
+    }
+
+    public LocalDate getDateEnd() {
+        return dateEnd;
+    }
+
+    public void setDateEnd(LocalDate dateEnd) {
+        this.dateEnd = dateEnd;
     }
 
     public List<Description> getDescriptions() {
@@ -129,19 +167,51 @@ public class Order {
         this.descriptions = descriptions;
     }
 
+
+    public Order getOrder() {
+        return this;
+    }
+
+
     @Override
     public String toString() {
         return "Order{" +
-                "id=" + id +
-                ", kod='" + kod + '\'' +
+                "id='" + id + '\'' +
                 ", docNumber='" + docNumber + '\'' +
-                ", manager='" + manager + '\'' +
-                ", designer='" + designer + '\'' +
-                ", client='" + client + '\'' +
+                ", idManager='" + idManager + '\'' +
+                ", idDesigner='" + idDesigner + '\'' +
+                ", idClient='" + idClient + '\'' +
+                ", price=" + price +
                 ", durationTime=" + durationTime +
                 ", dateCreate=" + dateCreate +
+                ", timeCreate=" + timeCreate +
                 ", dateToFactory=" + dateToFactory +
+                ", dateEnd=" + dateEnd +
                 '}';
+    }
+
+
+    /**
+     * fields idDesigner, dateEnd and descriptions (List<Description>) NOT compare!!!
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj.getClass().equals(Order.class)) {
+            Order order = (Order) obj;
+            boolean equalsId = this.id.equals(order.getId());
+            boolean equalsDocNumber = this.docNumber.equals(order.getDocNumber());
+            boolean equalsManager = this.idManager.equals(order.getIdManager());
+            boolean equalsClient = this.idClient.equals(order.getIdClient());
+            boolean equalsPrice = (this.price == order.getPrice());
+            boolean equalsDurationTime = (this.durationTime == order.getDurationTime());
+            boolean equalsDateCreate = this.dateCreate.equals(order.getDateCreate());
+            boolean equalsTimeCreate = this.timeCreate.equals(order.getTimeCreate());
+            boolean equalsDateToFactory = this.dateToFactory.equals(order.getDateToFactory());
+
+            return equalsId && equalsDocNumber && equalsManager && equalsClient && equalsPrice && equalsDurationTime &&
+                    equalsDateCreate && equalsTimeCreate && equalsDateToFactory;
+        }
+        return false;
     }
 }
 

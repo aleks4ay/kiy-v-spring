@@ -4,67 +4,51 @@ DROP TABLE IF EXISTS orders;
 DROP TABLE IF EXISTS worker_roles;
 DROP TABLE IF EXISTS worker;
 DROP TABLE IF EXISTS client;
-DROP SEQUENCE IF EXISTS global_seq_user;
-DROP SEQUENCE IF EXISTS global_seq_order;
+-- DROP SEQUENCE IF EXISTS global_seq_user;
+-- DROP SEQUENCE IF EXISTS global_seq_order;
 
-CREATE SEQUENCE global_seq_user START WITH 1;
-CREATE SEQUENCE global_seq_order START WITH 100000;
+-- CREATE SEQUENCE global_seq_user START WITH 1;
+-- CREATE SEQUENCE global_seq_order START WITH 100000;
 
 CREATE TABLE worker
 (
-  id               INTEGER PRIMARY KEY DEFAULT nextval('global_seq_user'),
-  name             VARCHAR                 NOT NULL,
-  email            VARCHAR,
-  password         VARCHAR,
-  registered       TIMESTAMP DEFAULT now() NOT NULL,
-  enabled          BOOL DEFAULT TRUE       NOT NULL
+  id               VARCHAR PRIMARY KEY NOT NULL ,
+  name             VARCHAR             NOT NULL
 );
 
 CREATE TABLE client
 (
-  id              VARCHAR PRIMARY KEY DEFAULT nextval('global_seq_user'),
-  id_from_1c      VARCHAR UNIQUE NOT NULL ,
-  id_parent       VARCHAR,
-  isfolder        INTEGER,
-  descr1          VARCHAR,
-  descr2          VARCHAR,
-  phone           VARCHAR,
-  inn             VARCHAR,
-  num_certificate VARCHAR,
-  addr_fis        VARCHAR,
-  addr_urid       VARCHAR
+  id              VARCHAR PRIMARY KEY NOT NULL ,
+  clientname      VARCHAR
 );
 
 
-CREATE UNIQUE INDEX client_unique_idx ON client (id_from_1c);
-
 CREATE TABLE worker_roles
 (
-  worker_id INTEGER NOT NULL,
+  worker_id VARCHAR NOT NULL,
   role    VARCHAR,
-  CONSTRAINT worker_roles_idx UNIQUE (worker_id, role),
   FOREIGN KEY (worker_id) REFERENCES worker (id) ON DELETE CASCADE
 );
 
 
-
-
 CREATE TABLE orders
 (
-  id    INTEGER PRIMARY KEY DEFAULT nextval('global_seq_order'),
-  iddoc varchar NOT NULL,
+  id    VARCHAR PRIMARY KEY NOT NULL ,
   docno VARCHAR NOT NULL,
   client_id VARCHAR NOT NULL,
   manager_id VARCHAR NOT NULL,
-  designer_id INTEGER,
+  designer_id VARCHAR,
   duration integer,
-  t_create TIMESTAMP,
-  t_factory TIMESTAMP,
-  t_end TIMESTAMP,
---   price DEC(14,3),
+  d_create DATE,
+  t_create TIME,
+  d_factory DATE,
+  d_end DATE,
+  price DOUBLE PRECISION,
 --   marker INTEGER
-  CONSTRAINT order_idx UNIQUE (iddoc, docno),
-  FOREIGN KEY (client_id) REFERENCES client (id) ON DELETE CASCADE
+  CONSTRAINT order_idx UNIQUE (id),
+  FOREIGN KEY (client_id) REFERENCES client (id) ON DELETE CASCADE,
+  FOREIGN KEY (manager_id) REFERENCES worker (id) ON DELETE CASCADE,
+  FOREIGN KEY (designer_id) REFERENCES worker (id) ON DELETE CASCADE
 );
 
 /*

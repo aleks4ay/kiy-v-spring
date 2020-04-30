@@ -17,28 +17,27 @@ import static org.unitils.reflectionassert.ReflectionAssert.assertReflectionEqua
 
 public class ClientDaoJdbcTest {
 
-    private static Connection connPostgres = UtilDao.getConnPostgres();
-    private ClientDao clientDao;
+    private static Connection connPostgresTest = UtilDao.getConnTest();
+    private ClientDao clientDao = new ClientDaoJdbc(connPostgresTest);
 
-    Client client1, client2, client3, client4;
     List<Client> clientList = new ArrayList<>();
 
     @Before
     public void setUp() {
-        clientDao = new ClientDaoJdbc();
         try {
-            connPostgres.createStatement().execute("DELETE FROM client;");
+            connPostgresTest.createStatement().executeUpdate("DELETE FROM client;");
+            connPostgresTest.createStatement().executeUpdate("INSERT INTO client(id, clientname) VALUES ('kod1', 'client name 1'), " +
+                    "('kod2', 'client name 2'), ('kod3', 'client name 3'), ('kod4', 'client name 4');");
+            connPostgresTest.commit();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        client1 = new Client("kod1", "client name 1");
-        client2 = new Client("kod2", "client name 2");
-        client3 = new Client("kod3", "client name 3");
-        client4 = new Client("kod4", "client name 4");
+        Client client1 = new Client("kod1", "client name 1");
+        Client client2 = new Client("kod2", "client name 2");
+        Client client3 = new Client("kod3", "client name 3");
+        Client client4 = new Client("kod4", "client name 4");
 
         clientList = Arrays.asList(client1, client2, client3, client4);
-
-        clientDao.saveAll(clientList);
     }
 
     @Test
@@ -53,7 +52,7 @@ public class ClientDaoJdbcTest {
         assertReflectionEquals(clientList, result,  ReflectionComparatorMode.IGNORE_DEFAULTS);
     }
 
-    @Test
+   /* @Test
     public void testSave() throws Exception {
         boolean result = clientDao.save(new Client("id 5", "clientName test Save"));
         Assert.assertEquals(true, result);
@@ -64,7 +63,7 @@ public class ClientDaoJdbcTest {
         boolean result = clientDao.delete("kod1");
         Assert.assertEquals(true, result);
     }
-
+*/
     @Test
     public void testSaveAll() throws Exception {
         List<Client> tempClientList = Arrays.asList(new Client("id7", "n7"), new Client("id8", "n8"), new Client("id9", "n9"));
@@ -80,40 +79,7 @@ public class ClientDaoJdbcTest {
 
     @Test
     public void testDeleteAll() throws Exception {
-        Collection<String> clientListId;
         boolean result = clientDao.deleteAll(Arrays.asList("kod1", "kod4", "kod2"));
-        Assert.assertEquals(true, result);
-    }
-
-    @Test
-    public void testIsBlocking() throws Exception {
-        connPostgres.createStatement().execute("UPDATE table_flag SET status = TRUE WHERE parametr_nane = 'blocking';");
-        boolean result = clientDao.isBlocking();
-        Assert.assertEquals(true, result);
-    }
-
-    @Test
-    public void testIsBlocking2() throws Exception {
-        connPostgres.createStatement().execute("UPDATE table_flag SET status = FALSE WHERE parametr_nane = 'blocking';");
-        boolean result = clientDao.isBlocking();
-        Assert.assertEquals(false, result);
-    }
-
-    @Test
-    public void testSetLock() throws Exception {
-        // prepared
-        connPostgres.createStatement().execute("UPDATE table_flag SET status = FALSE WHERE parametr_nane = 'blocking';");
-        // test
-        boolean result = clientDao.setLock();
-        Assert.assertEquals(true, result);
-    }
-
-    @Test
-    public void testSetUnlock() throws Exception {
-        // prepared
-        connPostgres.createStatement().execute("UPDATE table_flag SET status = TRUE WHERE parametr_nane = 'blocking';");
-        //test
-        boolean result = clientDao.setUnlock();
         Assert.assertEquals(true, result);
     }
 }

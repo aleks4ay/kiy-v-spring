@@ -62,7 +62,7 @@ public class OrderServiceImplTest {
 
     @Test
     public void testGetOne() throws Exception {
-        Order result = orderService.getOne(1);
+        Order result = orderService.getOne("kod1");
         Order expected = new Order("kod1", "docNumber1", "manager1", "designer1", "client1");
         assertReflectionEquals(expected, result,  ReflectionComparatorMode.IGNORE_DEFAULTS);
     }
@@ -76,14 +76,13 @@ public class OrderServiceImplTest {
 
     @Test
     public void testDelete() throws Exception {
-        boolean result = orderService.delete(1);
+        boolean result = orderService.delete("kod1");
         Assert.assertEquals(true, result);
     }
 
     @Test
     public void testUpdate() throws Exception {
         Order newOrder = new Order("kod1", "docNumber_update", "manager_update", "designer_update", "client_update");
-        newOrder.setId(1);
         Order result = orderService.update(newOrder);
         assertReflectionEquals(newOrder, result, ReflectionComparatorMode.IGNORE_DEFAULTS);
     }

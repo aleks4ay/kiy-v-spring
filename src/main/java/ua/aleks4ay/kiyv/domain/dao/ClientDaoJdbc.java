@@ -19,15 +19,12 @@ public class ClientDaoJdbc implements ClientDao {
     private static final String SQL_GET_ONE = "SELECT clientname FROM client WHERE id = ?;";
     private static final String SQL_GET_ALL = "SELECT id, clientname FROM client;";
     private static final String SQL_DELETE = "DELETE FROM client WHERE id = ?;";
-    private static final String SQL_CHECK_LOCK = "SELECT status FROM table_flag WHERE parametr_nane = 'blocking';";
     private static final String SQL_SAVE = "INSERT INTO client (id, clientname) VALUES (?, ?);";
     private static final String SQL_UPDATE = "UPDATE client SET clientname = ? WHERE id = ?;";
-    private static final String SQL_SET_LOCK = "UPDATE table_flag SET status = TRUE WHERE parametr_nane = 'blocking';";
-    private static final String SQL_SET_UNLOCK = "UPDATE table_flag SET status = FALSE WHERE parametr_nane = 'blocking';";
 
 
-    public ClientDaoJdbc() {
-        connPostgres = UtilDao.getConnPostgres();
+    public ClientDaoJdbc(Connection conn) {
+        connPostgres = conn;
         log.debug("Get connection to PostgreSQL from {}.", UtilDao.class);
     }
 
@@ -69,7 +66,7 @@ public class ClientDaoJdbc implements ClientDao {
         return null;
     }
 
-    @Override
+   /* @Override
     public boolean save(Client newClient) {
         try (PreparedStatement statement = connPostgres.prepareStatement(SQL_SAVE)){
             log.debug("Prepared to save.");
@@ -77,8 +74,12 @@ public class ClientDaoJdbc implements ClientDao {
             statement.setString(2, newClient.getClientName());
             int result = statement.executeUpdate();
             if (result == 1) {
+                connPostgres.commit();
                 log.debug("Save new 'Client'. SQL = {}. Client = {}.", SQL_SAVE, newClient);
                 return true;
+            }
+            else {
+                connPostgres.rollback();
             }
         } catch (SQLException e) {
             log.warn("Exception during saving new 'Client'. SQL = {}. Client = {}.", SQL_SAVE, newClient, e);
@@ -94,6 +95,7 @@ public class ClientDaoJdbc implements ClientDao {
             statement.setString(1, id);
             int result = statement.executeUpdate();
             if (result == 1) {
+                connPostgres.commit();
                 log.debug("Client with id = {} deleted. SQL = {}.", id, SQL_DELETE);
                 return true;
             }
@@ -103,12 +105,11 @@ public class ClientDaoJdbc implements ClientDao {
         log.debug("Client with id = {} don't Deleted!!! SQL = {}.", id, SQL_DELETE);
         return false;
     }
-
+*/
 
     @Override
     public boolean saveAll(List<Client> clientList) {
         try {
-            connPostgres.setAutoCommit(false);
             int result = 0;
             for (Client client : clientList) {
                 PreparedStatement ps = connPostgres.prepareStatement(SQL_SAVE);
@@ -119,20 +120,16 @@ public class ClientDaoJdbc implements ClientDao {
                 int[] numberOfUpdates = ps.executeBatch();
                 result += IntStream.of(numberOfUpdates).sum();
             }
-            log.debug("Try commit");
-            connPostgres.commit();
-            log.debug("Commit - OK.");
-            connPostgres.setAutoCommit(true);
             if (result == clientList.size()) {
-                log.debug("{} Clients Saved. SQL = {}.", result, SQL_UPDATE);
+                log.debug("Try commit");
+                connPostgres.commit();
+                log.debug("Commit - OK. {} Clients Saved. SQL = {}.", result, SQL_SAVE);
                 return true;
             }
             else {
                 log.debug("Saved {}, but need to save {} clients. Not equals!!!", result, clientList.size());
+                connPostgres.rollback();
             }
-
-
-
         } catch (SQLException e) {
             log.warn("Exception during saving {} new 'Client'. SQL = {}.", clientList.size() , SQL_SAVE, e);
         }
@@ -143,7 +140,6 @@ public class ClientDaoJdbc implements ClientDao {
     @Override
     public boolean updateAll(List<Client> clientList) {
         try {
-            connPostgres.setAutoCommit(false);
             int result = 0;
             for (Client client : clientList) {
                 log.debug("Prepared updated 'Client' to batch. SQL = {}. Client = {}.", SQL_UPDATE, client);
@@ -158,15 +154,14 @@ public class ClientDaoJdbc implements ClientDao {
                     System.out.println("k[" + i + "] = " + numberOfUpdates[i]);
                 }
             }
-            log.debug("Try commit");
-            connPostgres.commit();
-            log.debug("Commit - OK.");
-            connPostgres.setAutoCommit(true);
             if (result == clientList.size()) {
-                log.debug("{} Clients updated. SQL = {}.", result, SQL_UPDATE);
+                log.debug("Try commit");
+                connPostgres.commit();
+                log.debug("Commit - OK. {} Clients updated. SQL = {}.", result, SQL_UPDATE);
                 return true;
             }
             else {
+                connPostgres.rollback();
                 log.debug("Updated {}, but need to update {} clients. Not equals!!!", result, clientList.size());
             }
         } catch (SQLException e) {
@@ -179,8 +174,6 @@ public class ClientDaoJdbc implements ClientDao {
     public boolean deleteAll(Collection<String> clientListId) {
         try {
             int result = 0;
-            connPostgres.setAutoCommit(false);
-            log.debug("Try to delete {} old 'Client'. SQL = {}.", clientListId.size() , SQL_DELETE);
             for (String id : clientListId) {
                 log.debug("Prepared old 'Client' for delete to batch. SQL = {}. Id = {}.", SQL_DELETE, id);
                 PreparedStatement ps = connPostgres.prepareStatement(SQL_DELETE);
@@ -189,67 +182,19 @@ public class ClientDaoJdbc implements ClientDao {
                 int[] numberOfUpdates = ps.executeBatch();
                 result += IntStream.of(numberOfUpdates).sum();
             }
-            log.debug("Try commit");
-            connPostgres.commit();
-            log.debug("Commit - OK.");
-            connPostgres.setAutoCommit(true);
             if (result == clientListId.size()) {
-                log.debug("{} Clients updated. SQL = {}.", result, SQL_DELETE);
+                log.debug("Try commit");
+                connPostgres.commit();
+                log.debug("Commit - OK. {} Clients updated. SQL = {}.", result, SQL_DELETE);
                 return true;
             }
             else {
+                connPostgres.rollback();
                 log.debug("Deleted {}, but need to delete {} clients. Not equals!!!", result, clientListId.size());
             }
         } catch (SQLException e) {
             log.warn("Exception during delete {} old 'Client'. SQL = {}.", clientListId.size() , SQL_DELETE, e);
         }
-        return false;
-    }
-
-
-    @Override
-    public boolean isBlocking() {
-        try (Statement statement = connPostgres.createStatement()){
-
-            ResultSet rs = statement.executeQuery(SQL_CHECK_LOCK);
-            log.debug("Check condition DataBase for writing. SQL = {}.", SQL_CHECK_LOCK);
-            rs.next();
-            return rs.getBoolean("status");
-
-        } catch (SQLException e) {
-            log.warn("Exception during check condition DataBase!!! SQL = {}.", SQL_CHECK_LOCK, e);
-        }
-        log.debug("Condition don't checked. DataBase must be locked for a while! SQL = {}.", SQL_CHECK_LOCK);
-        return true;
-    }
-
-    @Override
-    public boolean setLock() {
-        try (Statement statement = connPostgres.createStatement()){
-            int result = statement.executeUpdate(SQL_SET_LOCK);
-            if (result ==1 ) {
-                log.debug("Set lock to DataBase for another threads. SQL = {}.", SQL_SET_LOCK);
-                return true;
-            }
-        } catch (SQLException e) {
-            log.warn("Exception during set lock to DataBase. SQL = {}.", SQL_SET_LOCK, e);
-        }
-        log.debug("Not successful. Maybe, lock already set up. SQL = {}.", SQL_SET_LOCK);
-        return false;
-    }
-
-    @Override
-    public boolean setUnlock() {
-        try (Statement statement = connPostgres.createStatement()){
-            int result = statement.executeUpdate(SQL_SET_UNLOCK);
-            if (result == 1) {
-                log.debug("Set unlock to DataBase successful. SQL = {}.", SQL_SET_UNLOCK);
-                return true;
-            }
-        } catch (SQLException e) {
-            log.warn("Exception during set unlock to DataBase. SQL = {}.", SQL_SET_UNLOCK, e);
-        }
-        log.debug("Not successful. Maybe, unlock already set up. SQL = {}.", SQL_SET_LOCK);
         return false;
     }
 }

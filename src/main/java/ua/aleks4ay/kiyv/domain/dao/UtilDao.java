@@ -16,15 +16,21 @@ import static ua.aleks4ay.kiyv.log.ClassNameUtil.getCurrentClassName;
 public class UtilDao {
     private static Connection connDbf = null;
     private static Connection connPostgres = null;
+    private static Connection connTest = null;
     private static final Logger log = LoggerFactory.getLogger(getCurrentClassName());
-    static {
-        String driverDbf = null;
-        String urlDbf = null;
-        String driverPostgres = null;
-        String urlPostgres = null;
-        String user = null;
-        String password = null;
 
+    private static String driverDbf = null;
+    private static String driverPostgres = null;
+    private static String urlDbf = null;
+    private static String urlPostgres = null;
+    private static String urlTest = null;
+    private static String user = null;
+    private static String userTest = null;
+    private static String password = null;
+    private static String passwordTest = null;
+
+
+    static {
         //load DB properties
         try (InputStream in = UtilDao.class.getClassLoader().getResourceAsStream("persistence.properties")){
             Properties properties = new Properties();
@@ -39,11 +45,17 @@ public class UtilDao {
             log.debug("Loaded properties as Stream: dbf.driverClassName = {}, dbf.url = {}, database.driverClassName = {}, " +
                             "database.url = {}, database.username = {})",
                     driverDbf, urlDbf, driverPostgres, urlPostgres, user);
+
+            urlTest = properties.getProperty("db.urlTest");
+            userTest = properties.getProperty("db.usernameTest");
+            passwordTest = properties.getProperty("db.passwordTest");
+            log.debug("Loaded properties as Stream for Test: db.urlTest = {}, db.usernameTest = {})", urlTest, userTest);
         } catch (IOException e) {
             log.warn("Exception during Loaded properties from file {}.", new File("/persistence.properties").getPath(), e);
         }
+    }
 
-        //acquire DB connection to DBF
+    public static Connection getConnDbf() {
         try {
             Class.forName(driverDbf);
             connDbf = DriverManager.getConnection(urlDbf);
@@ -51,42 +63,32 @@ public class UtilDao {
         } catch (SQLException | ClassNotFoundException e) {
             log.warn("Exception during create connection for 'dbf-files' from 1C. Url= {}.", urlDbf, e);
         }
-
-        //acquire DB connection to Postgres
-        try {
-            Class.forName(driverPostgres);
-            connPostgres = DriverManager.getConnection(urlPostgres, user, password);
-            log.debug("Created connection for 'postgres'. Url= {}, user= {}.", urlPostgres, user);
-        } catch (SQLException | ClassNotFoundException e) {
-            log.warn("Exception during create connection for 'postgres' url= {}, user= {}.", urlPostgres, user, e);
-        }
-    }
-
-    public static Connection getConnDbf() {
-//        log.debug("Try return connection for 'dbf-files' from 1C.");
         return connDbf;
     }
 
     public static Connection getConnPostgres() {
-//        log.debug("Try return connection for Postgres.");
+        try {
+            Class.forName(driverPostgres);
+            connPostgres = DriverManager.getConnection(urlPostgres, user, password);
+            connPostgres.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+            connPostgres.setAutoCommit(false);
+            log.debug("Created connection for 'postgres'. Url= {}, user= {}.", urlPostgres, user);
+        } catch (SQLException | ClassNotFoundException e) {
+            log.warn("Exception during create connection for 'postgres' url= {}, user= {}.", urlPostgres, user, e);
+        }
         return connPostgres;
     }
 
-/*    @Override
-    protected void finalize ( ) {
+    public static Connection getConnTest() {
         try {
-            log.debug("Try close DBF-connection.");
-            connDbf.close();
-            log.debug("Closed DBF-connection. OK.");
-        } catch (SQLException e) {
-            log.warn("Exception during close DBF-connection.", e);
+            Class.forName(driverPostgres);
+            connTest = DriverManager.getConnection(urlTest, userTest, passwordTest);
+            connTest.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+            connTest.setAutoCommit(false);
+            log.debug("Created connection for 'postgres'. Url= {}, user= {}.", urlTest, userTest);
+        } catch (SQLException | ClassNotFoundException e) {
+            log.warn("Exception during create connection for 'postgres' url= {}, user= {}.", urlTest, userTest, e);
         }
-        try {
-            log.debug("Try close connection for Postresql.");
-            connPostgres.close();
-            log.debug("Closed connection for Postresql. OK");
-        } catch (SQLException e) {
-            log.warn("Exception during close connection for Postresql.", e);
-        }
-    }*/
+        return connTest;
+    }
 }

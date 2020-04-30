@@ -8,11 +8,11 @@ public interface OrderService {
 
     Order save(Order order);
 
-    boolean delete(int id);
+    boolean delete(String id);
 
     Order update(Order order);
 
-    Order getOne(int id);
+    Order getOne(String id);
 
     List<Order> getAll();
 

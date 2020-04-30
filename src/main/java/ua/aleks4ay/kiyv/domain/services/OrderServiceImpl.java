@@ -23,7 +23,7 @@ public class OrderServiceImpl implements OrderService{
 
     @Override
     @Transactional
-    public boolean delete(int id) {
+    public boolean delete(String id) {
         if (getOne(id) != null) {
             orderRepository.deleteById(id);
             if (getOne(id) == null) {
@@ -44,8 +44,8 @@ public class OrderServiceImpl implements OrderService{
     }
 
     @Override
-    public Order getOne(int id) {
-        Order order = orderRepository.findById(id).orElse(null);
+    public Order getOne(String id) {
+        Order order = orderRepository.findById(id);
         return order;
     }
 

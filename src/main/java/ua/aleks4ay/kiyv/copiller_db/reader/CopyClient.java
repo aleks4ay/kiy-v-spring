@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ua.aleks4ay.kiyv.domain.dao.ClientDao;
 import ua.aleks4ay.kiyv.domain.dao.ClientDaoJdbc;
+import ua.aleks4ay.kiyv.domain.dao.UtilDao;
 import ua.aleks4ay.kiyv.domain.dbf.ClientDbf;
 import ua.aleks4ay.kiyv.domain.dbf.ClientDbfReader;
 import ua.aleks4ay.kiyv.domain.model.Client;
@@ -18,7 +19,7 @@ import static ua.aleks4ay.kiyv.log.ClassNameUtil.getCurrentClassName;
 public class CopyClient {
 
     private static final CopyClient copyClient = new CopyClient();
-    private static final ClientDao clientDao = new ClientDaoJdbc();
+    private static final ClientDao clientDao = new ClientDaoJdbc(UtilDao.getConnPostgres());
     private static final ClientDbf clientDbfReader = new ClientDbfReader();
     private static final Logger log = LoggerFactory.getLogger(getCurrentClassName());
 
@@ -30,28 +31,14 @@ public class CopyClient {
     }
 
     public static void main(String[] args) {
-        long start = System.currentTimeMillis();
 
-        log.debug("Executing doCopyClient.");
         CopyClient.getInstance().doCopyNewRecord();
 
-        long end = System.currentTimeMillis();
-        System.out.println("time = " + (double)(end-start) + " mc." );
     }
 
     public void doCopyNewRecord() {
-        log.debug("Start writing 'C L I E N T S'.");
-        log.debug("Check availability write to DataBase.");
-        while ( clientDao.isBlocking()) {
-            try {
-                log.debug("Wait 5 seconds.");
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                log.warn("Exception during try 'Thread.sleep' 5 seconds.", e);
-            }
-        }
-//        log.debug("Set lock to DataBase for another threads.");
-        clientDao.setLock();
+        long start = System.currentTimeMillis();
+        log.info("Start writing 'C L I E N T S'.");
 
         List<Client> listNewClient = new ArrayList<>();
         List<Client> listUpdatingClient = new ArrayList<>();
@@ -87,9 +74,7 @@ public class CopyClient {
             clientDao.deleteAll(oldClient.keySet());
         }
 
-//        log.debug("Set unlock to DataBase.");
-        clientDao.setUnlock();
-
-        log.debug("End writing 'C L I E N T S'.");
+        long end = System.currentTimeMillis();
+        log.info("End writing 'C L I E N T S'. Time = {} c.", (double)(end-start)/1000);
     }
 }
